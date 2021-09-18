@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 public class TestBase {
-    public static String toAddress;
     public static String testMethod;
     public static ExtentReports reports;
     public static ExtentHtmlReporter htmlReporter;
@@ -116,13 +115,5 @@ public class TestBase {
             testInfo.get().skip(result.getThrowable());
 
         reports.flush();
-    }
-
-    @Parameters({ "toMails", "groupReport" })
-    @AfterSuite(description = "clean up report after test suite")
-    public void cleanup(String toMails, String groupReport) {
-
-        toAddress = toMails;
-        SendMail.composeGmail("BioRegistra Portal Report <seamfix.test.report@gmail.com>", toAddress, groupReport);
     }
 }
