@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="KneatQA" parallel="tests" thread-count="1">
+	<parameter name="groupReport" value="/test-report/BookingReport.html" />
+	<parameter name="server" value="local" />
+	<parameter name="device" value="desktop" />
+	<parameter name="myBrowser" value="chrome" />
+
+	<test name="test1" preserve-order="true">
+		<parameter name="user" value="" />
+		<classes>
+			<class name="test.Search">
+				<methods>
+					<include name="emptyLocationSearch" />
+					<include name="blankSpaceLocationSearch" />
+				</methods>
+			</class>
+		</classes>
+	</test>
+
+</suite>

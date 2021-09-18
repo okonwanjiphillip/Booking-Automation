@@ -59,9 +59,9 @@ public class TestBase {
         reports.attachReporter(htmlReporter);
     }
 
-    @Parameters({ "myBrowser", "environment", "server" })
+    @Parameters({ "myBrowser", "server" })
     @BeforeClass
-    public void beforeClass(String myBrowser, String environment, String server) throws Exception {
+    public void beforeClass(String myBrowser, String server) throws Exception {
         ExtentTest parent = reports.createTest(getClass().getName());
         parentTest.set(parent);
 
