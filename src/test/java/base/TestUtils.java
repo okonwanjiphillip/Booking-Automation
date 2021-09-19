@@ -8,23 +8,25 @@ import enums.TargetTypeEnum;
 import org.apache.commons.codec.binary.Base64;
 import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class TestUtils extends TestBase{
 
-    public static List<String> imgList = new ArrayList();
-
-     @SuppressWarnings("resource")
-    public static String getScreenshot() {
+    public static String getScreenshot() throws IOException {
         TakesScreenshot ts = (TakesScreenshot) getDriver();
         File scrFile = ts.getScreenshotAs(OutputType.FILE);
 
         String encodedBase64 = null;
-        FileInputStream fileInputStreamReader;
+        FileInputStream fileInputStreamReader = null;
         try {
             fileInputStreamReader = new FileInputStream(scrFile);
             byte[] bytes = new byte[(int) scrFile.length()];
@@ -33,37 +35,19 @@ public class TestUtils extends TestBase{
 
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            fileInputStreamReader.close();
         }
 
          return "data:image/png;base64," + encodedBase64;
     }
 
-    /*public static String takeScreenshot() throws IOException {
-        String fileName = projectNameFolder + SUFFIX + folder + SUFFIX + testMethod + System.currentTimeMillis();
-        TakesScreenshot ts = (TakesScreenshot) getDriver();
-        byte[] pic = ts.getScreenshotAs(OutputType.BYTES);
-        InputStream scrFile = new ByteArrayInputStream(pic);
-        ObjectMetadata meta = new ObjectMetadata();
-        meta.setContentLength(pic.length);
-        meta.setContentType("image/png");
-
-        String screenshot = createConnection().getUrl(bucketName, fileName).toExternalForm();
-        imgList.add(screenshot);
-        // Collections.sort(imgList);
-        return screenshot;
-    }*/
-
-    public static boolean isAlertPresents() {
-        try {
-            getDriver().switchTo().alert();
-            return true;
-        } // try
-        catch (Exception e) {
-            return false;
-        } // catch
+    public static void addScreenShot() throws IOException {
+        String screenshotPath = TestUtils.getScreenshot();
+        testInfo.get().addScreenCaptureFromBase64String(screenshotPath);
     }
 
-    public static String CheckBrowser() {
+    public static String checkBrowser() {
         // Get Browser name and version.
         Capabilities caps = ((RemoteWebDriver) getDriver()).getCapabilities();
         String browserName = caps.getBrowserName();
@@ -78,6 +62,7 @@ public class TestUtils extends TestBase{
      *
      */
     public static void sendKeys(By locator, String text) {
+        getDriver().findElement(locator).click();
         getDriver().findElement(locator).clear();
         getDriver().findElement(locator).sendKeys(text);
     }
@@ -127,6 +112,34 @@ public class TestUtils extends TestBase{
             testInfo.get().error(value + " not found");
             testInfo.get().error(verificationErrorString);
         }
+    }
+
+    /**
+     * @return New Date with
+     * @description to generate randomIP address.
+     */
+    public static String getFutureDate(int futureTimePeriod) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar calendar = Calendar.getInstance();
+
+        testInfo.get().info("Current Date = " + calendar.getTime());
+
+        calendar.add(Calendar.MONTH, futureTimePeriod);
+        Date newDate = calendar.getTime();
+        String newD = formatter.format(newDate);
+
+        testInfo.get().info("Updated Date = " + calendar.getTime());
+        return newD;
+    }
+
+    public static void closeModal() {
+        WebDriverWait wait = new WebDriverWait(getDriver(), 30);
+
+        header("Cookie Modal");
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("onetrust-policy-title")));
+        assertSearchText("ID", "onetrust-policy-title", "Manage cookie preferences");
+        clickElement("ID", "onetrust-accept-btn-handler");
     }
 
     public static void header(String text) {
