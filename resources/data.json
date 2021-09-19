@@ -5,6 +5,7 @@
 
   "searchChar": {
     "specialChar": "@",
+    "blankLocation": "    ",
     "validLocation": "Limerick"
   }
 }

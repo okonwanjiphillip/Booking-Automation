@@ -15,7 +15,7 @@
 					<include name="blankSpaceLocationSearch" />
 <!--					<include name="specialCharacterLocationSearch" />-->
 					<include name="validLocationSearch" />
-					<include name="setDate" />
+					<include name="setDateForSearch" />
 				</methods>
 			</class>
 		</classes>

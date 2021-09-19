@@ -11,6 +11,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
+import test.Search;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +56,6 @@ public class TestUtils extends TestBase{
 
     /**
      * This method is used to clear input fields and send keys
-     *
      */
     public static void sendKeys(By locator, String text) {
         getDriver().findElement(locator).click();
@@ -65,7 +65,6 @@ public class TestUtils extends TestBase{
 
     /**
      * This method clicks on elements and also elements that are overlapped by other elements
-     *
      */
     public static void clickElement(String type, String element) {
         JavascriptExecutor ex = (JavascriptExecutor) getDriver();
@@ -82,9 +81,6 @@ public class TestUtils extends TestBase{
     }
 
     /**
-     * @param type
-     * @param element
-     * @param value
      * @description to check if the expected text is present in the page.
      */
     public static void assertSearchText(String type, String element, String value) {
@@ -102,7 +98,7 @@ public class TestUtils extends TestBase{
         try {
             Assert.assertEquals(text, value);
             testInfo.get().log(Status.INFO, value + " found");
-        } catch (Error e) {
+        } catch (RuntimeException e) {
             verificationErrors.append(e);
             String verificationErrorString = verificationErrors.toString();
             testInfo.get().error(value + " not found");
@@ -128,11 +124,84 @@ public class TestUtils extends TestBase{
         return newD;
     }
 
+    public static void printList(int count, String validLocation, By path) {
+        String flag = null;
+        for (int i = 1; i <= count; i++) {
+            try {
+                WebElement records = getDriver().findElement(path);
+                if (records != null) {
+                    flag = getDriver().findElement(path).getText();
+                    Assert.assertTrue(flag.contains(validLocation));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (flag != null) {
+            boolean neededText = flag.contains(validLocation);
+            if (!neededText) {
+                testInfo.get().error(validLocation + " text is not present in the list.");
+            } else {
+                testInfo.get().info(validLocation + " text is present in the list.");
+            }
+        }
+    }
+
+    /**
+     * @description to scroll to a particular element on the page.
+     */
+    public static void scrollToElement(String type, String element) {
+        JavascriptExecutor jse = (JavascriptExecutor) getDriver();
+        WebElement scrollDown = null;
+        TargetTypeEnum targetTypeEnum = TargetTypeEnum.valueOf(type);
+        scrollDown = switch (targetTypeEnum) {
+            case ID -> getDriver().findElement(By.id(element));
+            case NAME -> getDriver().findElement(By.name(element));
+            case CSSSELECTOR -> getDriver().findElement(By.cssSelector(element));
+            case XPATH -> getDriver().findElement(By.xpath(element));
+            case CLASSNAME -> getDriver().findElement(By.className(element));
+        };
+
+        jse.executeScript("arguments[0].scrollIntoView();", scrollDown);
+        TestUtils.getScreenshot();
+    }
+
+    /*public static void getList() {
+        String flag = null;
+        for (int i = 1; i <= count; i++) {
+            try {
+                WebElement records = getDriver().findElement(path);
+                if (records != null) {
+                    flag = getDriver().findElement(path).getText();
+                    Assert.assertTrue(flag.contains(validLocation));
+                }
+                if (flag != null) {
+                    boolean neededText = flag.contains(validLocation);
+                    if (!neededText) {
+                        testInfo.get().error(validLocation + " text is not present in the list.");
+                    } else {
+                        testInfo.get().info(validLocation + " text is present in the list.");
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }*/
+
+    public static int listOfProperties() {
+        String list = getDriver().findElement(By.xpath(Search.TEXT)).getText();
+        String[] word = list.split(" ");
+        String word1 = word[1];
+        return Integer.parseInt(word1);
+    }
+
     public static void closeModal() {
         WebDriverWait wait = new WebDriverWait(getDriver(), 30);
 
-        header("Cookie Modal");
+        header("Close Cookie Modal");
 
+        TestUtils.addScreenShot();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("onetrust-policy-title")));
         assertSearchText("ID", "onetrust-policy-title", "Manage cookie preferences");
         clickElement("ID", "onetrust-accept-btn-handler");
@@ -147,6 +216,7 @@ public class TestUtils extends TestBase{
         Markup a = MarkupHelper.createLabel(text, ExtentColor.GREEN);
         testInfo.get().info(a);
     }
+
     public static void validationHeader(String text) {
         Markup a = MarkupHelper.createLabel(text, ExtentColor.BROWN);
         testInfo.get().info(a);

@@ -23,6 +23,8 @@ public class TestBase {
     private static final ThreadLocal<ExtentTest> parentTest = new ThreadLocal<>();
     public static final ThreadLocal<ExtentTest> testInfo = new ThreadLocal<>();
     private static final String USER = "user.dir";
+    public static final String XPATH = "XPATH";
+    public static final int TIME = 15;
 
     public static WebDriver getDriver() {
         return driver.get();
@@ -43,7 +45,7 @@ public class TestBase {
 
     @BeforeSuite
     @Parameters({ "groupReport", "device" })
-    public void setUp(String groupReport, String device) throws Exception {
+    public void setUp(String groupReport, String device) throws IOException, ParseException {
         ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(new File(System.getProperty(USER) + groupReport));
         reports = new ExtentReports();
         reports.setSystemInfo("Test Environment", myUrl());
@@ -55,7 +57,7 @@ public class TestBase {
 
     @Parameters({ "myBrowser", "server" })
     @BeforeClass
-    public void beforeClass(String myBrowser, String server) throws Exception {
+    public void beforeClass(String myBrowser, String server) throws IOException, ParseException {
         ExtentTest parent = reports.createTest(getClass().getName());
         parentTest.set(parent);
 
@@ -86,11 +88,10 @@ public class TestBase {
         testInfo.set(child);
         testInfo.get().assignCategory("Regression");
         testInfo.get().getModel().setDescription(TestUtils.checkBrowser());
-        final String testMethod = getClass().getName() + "-" + method.getName();
     }
 
     @AfterMethod(description = "to display the result after each test method")
-    public void captureStatus(ITestResult result) throws IOException {
+    public void captureStatus(ITestResult result) {
 
         if (result.getStatus() == ITestResult.FAILURE) {
             TestUtils.addScreenShot();

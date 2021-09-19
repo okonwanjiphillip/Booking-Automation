@@ -16,35 +16,46 @@ import org.testng.annotations.Test;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
+
 
 public class Search extends TestBase {
+    private static final String SEARCH_BUTTON = "//button[@type='submit']";
+    private static final String LOCATION_FIELD = "ss";
+    public static final String TEXT = "//div[@id='right']/div[2]/div/div/div/h1";
 
     @Test
     @Parameters({"server"})
     public static void emptyLocationSearch() {
-        WebDriverWait wait = new WebDriverWait(getDriver(), 30);
+        WebDriverWait wait = new WebDriverWait(getDriver(), TIME);
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(LOCATION_FIELD)));
+        TestUtils.closeModal();
 
         TestUtils.header("Search with empty location field");
-
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ss")));
-        TestUtils.closeModal();
-        getDriver().findElement(By.id("ss")).clear();
-        TestUtils.clickElement("XPATH", "//button[@type='submit']");
-        TestUtils.assertSearchText("XPATH", "//div[@id='destination__error']/div", "Error: Please enter a destination to start searching.");
+        getDriver().findElement(By.id(LOCATION_FIELD)).clear();
+        TestUtils.clickElement(XPATH, SEARCH_BUTTON);
+        TestUtils.assertSearchText(XPATH, "//div[@id='destination__error']/div", "Error:\nPlease enter a destination to start searching.");
     }
 
     @Test
     @Parameters({"server"})
-    public static void blankSpaceLocationSearch() {
-        WebDriverWait wait = new WebDriverWait(getDriver(), 30);
+    public static void blankSpaceLocationSearch() throws IOException, ParseException {
+        WebDriverWait wait = new WebDriverWait(getDriver(), TIME);
+
+        JSONParser parser = new JSONParser();
+        JSONObject config = (JSONObject) parser.parse(new FileReader("resources/data.json"));
+        JSONObject envs = (JSONObject) config.get("searchChar");
+
+        String blankLocation = (String) envs.get("blankLocation");
 
         TestUtils.header("Search with blank spaces location field");
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ss")));
-        TestUtils.sendKeys(By.id("ss"), "    ");
-        TestUtils.clickElement("XPATH", "//button[@type='submit']"); //div[@id='right']/div[2]/div/div/div/h1
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='right']/div[2]/div/div/div/h1")));
-        TestUtils.assertSearchText("XPATH", "//div[@id='right']/div[2]/div/div/div/h1", "0 properties are available in and around this destination");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(LOCATION_FIELD)));
+        TestUtils.sendKeys(By.id(LOCATION_FIELD), blankLocation);
+        TestUtils.clickElement(XPATH, SEARCH_BUTTON); //div[@id='right']/div[2]/div/div/div/h1
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TEXT)));
+        TestUtils.assertSearchText(XPATH, TEXT, "0 properties are available in and around this destination");
     }
 
     /*@Test
@@ -98,7 +109,7 @@ public class Search extends TestBase {
     @Test
     @Parameters({"server"})
     public static void validLocationSearch() throws IOException, ParseException {
-        WebDriverWait wait = new WebDriverWait(getDriver(), 30);
+        WebDriverWait wait = new WebDriverWait(getDriver(), TIME);
 
         JSONParser parser = new JSONParser();
         JSONObject config = (JSONObject) parser.parse(new FileReader("resources/data.json"));
@@ -106,60 +117,72 @@ public class Search extends TestBase {
 
         String validLocation = (String) envs.get("validLocation");
 
-        TestUtils.header("Search for a valid location: " + validLocation);
-
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ss")));
-        TestUtils.sendKeys(By.id("ss"), validLocation);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(LOCATION_FIELD)));
+        TestUtils.sendKeys(By.id(LOCATION_FIELD), validLocation);
 
         TestUtils.validationHeader("Check the auto-suggest feature of the location field.");
 
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//form[@id='frm']/div[2]/div/div/ul[1]/li")));
         List<WebElement> optionCount = getDriver().findElements(By.xpath("//div[2]/div/div/ul"));
         int recordCount = optionCount.size();
-        String flag = null;
-        for (int i = 1; i <= recordCount; i++) {
-            try {
-                WebElement records = getDriver().findElement(By.xpath("//form[@id='frm']/div[2]/div/div/ul[1]/li["+ i +"]"));
-                if (records != null) {
-                    flag = getDriver().findElement(By.xpath("//form[@id='frm']/div[2]/div/div/ul[1]/li["+ i +"]/span[2]/span")).getText();
-                    Assert.assertTrue(flag.contains(validLocation));
-                }
-                if (flag != null) {
-                    boolean neededText = flag.contains(validLocation);
-                    if (!neededText) {
-                        testInfo.get().error(validLocation + " text is not present in " + flag);
-                    } else {
-                        testInfo.get().info(validLocation + " text is present in " + flag);
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        TestUtils.printList(recordCount, validLocation, By.xpath("//form[@id='frm']/div[2]/div/div/ul[1]/li[" + recordCount + "]/span[2]/span"));
+
+        if (recordCount < 5) {
+            testInfo.get().error("Error: Auto-suggestion list is supposed to have 5 items");
         }
 
-        TestUtils.clickElement("XPATH", "//button[@type='submit']");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='right']/div[2]/div/div/div/h1")));
-        TestUtils.assertSearchText("XPATH", "//div[@id='right']/div[2]/div/div/div/h1", "Limerick: 40 properties found");
+        TestUtils.header("Search for a valid location: " + validLocation);
+
+        TestUtils.clickElement(XPATH, SEARCH_BUTTON);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TEXT)));
+        TestUtils.assertSearchText(XPATH, TEXT, "Limerick: 40 properties found");
     }
 
     @Test
     @Parameters({"server"})
-    public static void setDate() {
-        WebDriverWait wait = new WebDriverWait(getDriver(), 30);
+    public static void setDateForSearch() {
+        WebDriverWait wait = new WebDriverWait(getDriver(), TIME);
 
         TestUtils.header("Set Date to 3 months from current date");
 
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("div.sb-date-field__display")));
 
-        String newdate = TestUtils.getFutureDate(3);
+        String newDate = TestUtils.getFutureDate(3);
 
-        TestUtils.clickElement("XPATH", "//*[@id='frm']/div[3]/div/div[2]/div/div/div[2]");
-        TestUtils.clickElement("XPATH", "//*[@id='frm']/div[3]/div/div[2]/div/div/div[2]");
+        TestUtils.clickElement(XPATH, "//*[@id='frm']/div[3]/div/div[2]/div/div/div[2]");
+        TestUtils.clickElement(XPATH, "//*[@id='frm']/div[3]/div/div[2]/div/div/div[2]");
 
-        TestUtils.clickElement("XPATH", "//*[contains(@data-date,'"+newdate+"')]");
+        TestUtils.clickElement(XPATH, "//*[contains(@data-date,'" + newDate + "')]");
+        TestUtils.clickElement(XPATH, SEARCH_BUTTON);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='hotellist_inner']/div[10]/div[2]/div/div/div/h3/a/span")));
+        TestUtils.assertSearchText(XPATH, TEXT, "Limerick: 24 properties found");
 
-        TestUtils.assertSearchText("XPATH", "//div[@id='right']/div[2]/div/div/div/h1", "0 properties are available in and around this destination");
+//        TestUtils.listOfProperties();
+
+        TestUtils.subHeader("Print List of first 10 Properties");
+
+        for (int i = 1; i <= 10; i++) {
+            String records = getDriver().findElement(By.xpath("//div[@id='hotellist_inner']/div[" +  i + "]/div[2]/div/div/div/h3/a/span")).getText();
+            if (records != null) {
+                testInfo.get().info(records);
+            }
+        }
+    }
+
+    @Test
+    @Parameters({"server"})
+    public static void filterByBudget() {
+        WebDriverWait wait = new WebDriverWait(getDriver(), TIME);
+
+        TestUtils.header("Filter by Budget");
+
+        wait.until(ExpectedConditions.elementToBeClickable(By.id(LOCATION_FIELD)));
+
+        TestUtils.scrollToElement(XPATH, "//div[@id='filter_price']/div[3]/a/label/div/span");
+
     }
 
 
 }
+
+
