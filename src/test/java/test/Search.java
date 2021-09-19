@@ -140,7 +140,7 @@ public class Search extends TestBase {
 
     @Test
     @Parameters({"server"})
-    public static void setDateForSearch() {
+    public static void setDateForSearch() throws InterruptedException {
         WebDriverWait wait = new WebDriverWait(getDriver(), TIME);
 
         TestUtils.header("Set Date to 3 months from current date");
@@ -154,14 +154,15 @@ public class Search extends TestBase {
 
         TestUtils.clickElement(XPATH, "//*[contains(@data-date,'" + newDate + "')]");
         TestUtils.clickElement(XPATH, SEARCH_BUTTON);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='hotellist_inner']/div[10]/div[2]/div/div/div/h3/a/span")));
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//*[@id='hotellist_inner']")));
+        Thread.sleep(1000);
         TestUtils.assertSearchText(XPATH, TEXT, "Limerick: 24 properties found");
 
 //        TestUtils.listOfProperties();
 
-        TestUtils.subHeader("Print List of first 10 Properties");
+        TestUtils.subHeader("Print List of first 5 Properties");
 
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 5; i++) {
             String records = getDriver().findElement(By.xpath("//div[@id='hotellist_inner']/div[" +  i + "]/div[2]/div/div/div/h3/a/span")).getText();
             if (records != null) {
                 testInfo.get().info(records);
@@ -172,17 +173,71 @@ public class Search extends TestBase {
     @Test
     @Parameters({"server"})
     public static void filterByBudget() {
+
+        TestUtils.header("Filter by Budget: € 50 – € 100");
+        // € 50 – € 100
+        filterSearch("//div[@id='filter_price']/div[3]/a/label/div/span", "Limerick: 13 properties found");
+
+        TestUtils.header("Filter by Budget: € 100 – € 150");
+        // € 100 – € 150
+        filterSearch("//div[@id='filter_price']/div[3]/a[2]/label/div/span", "Limerick: 17 properties found");
+
+        TestUtils.header("Filter by Budget: € 150 – € 200");
+        // € 100 – € 150
+        filterSearch("//div[@id='filter_price']/div[3]/a[3]/label/div/span", "Limerick: 12 properties found");
+
+        TestUtils.header("Filter by Budget: € 200+");
+        // € 200+
+        filterSearch("//div[@id='filter_price']/div[3]/a[4]/label/div/span", "Limerick: 10 properties found");
+    }
+
+    @Test
+    @Parameters({"server"})
+    public static void filterByRating() {
         WebDriverWait wait = new WebDriverWait(getDriver(), TIME);
 
-        TestUtils.header("Filter by Budget");
+        TestUtils.header("Filter by Star Rating: 3 stars");
+        // 3 stars
+        filterSearch("//div[@id='filter_class']/div[2]/a/label/div/span", "Limerick: 10 properties found");
 
-        wait.until(ExpectedConditions.elementToBeClickable(By.id(LOCATION_FIELD)));
+        TestUtils.header("Filter by Star Rating: 4 stars");
+        // 4 stars
+        filterSearch("//div[@id='filter_class']/div[2]/a[2]/label/div/span", "Limerick: 12 properties found");
 
-        TestUtils.scrollToElement(XPATH, "//div[@id='filter_price']/div[3]/a/label/div/span");
+        TestUtils.header("Filter by Star Rating: 5 stars");
+        // 5 stars
+        filterSearch("//div[@id='filter_class']/div[2]/a[3]/label/div/span", "Limerick: 1 properties found");
+
+        TestUtils.header("Filter by Star Rating: Unrated");
+        // Unrated
+        filterSearch("//div[@id='filter_class']/div[2]/a[4]/label/div/span", "Limerick: 1 properties found");
 
     }
 
+    public static void filterSearch(String path, String text) {
+        WebDriverWait wait = new WebDriverWait(getDriver(), TIME);
 
+        wait.until(ExpectedConditions.elementToBeClickable(By.id(LOCATION_FIELD)));
+        TestUtils.scrollToElement(XPATH, path);
+
+        TestUtils.clickElement(XPATH, path);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.bui-spinner.bui-spinner--size-large > div.bui-spinner__inner")));
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.bui-spinner.bui-spinner--size-large > div.bui-spinner__inner")));
+        TestUtils.assertSearchText(XPATH, TEXT, text);
+
+        TestUtils.subHeader("Print List of first 5 Properties");
+        for (int i = 1; i <= 5; i++) {
+            String records = getDriver().findElement(By.xpath("//div[@id='hotellist_inner']/div[" +  i + "]/div[2]/div/div/div/h3/a/span")).getText();
+            if (records != null) {
+                testInfo.get().info(records);
+            }
+        }
+        // Uncheck selected budget
+        TestUtils.clickElement(XPATH, path);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.bui-spinner.bui-spinner--size-large > div.bui-spinner__inner")));
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.bui-spinner.bui-spinner--size-large > div.bui-spinner__inner")));
+
+    }
 }
 
 

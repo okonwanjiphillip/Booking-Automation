@@ -16,6 +16,11 @@
 <!--					<include name="specialCharacterLocationSearch" />-->
 					<include name="validLocationSearch" />
 					<include name="setDateForSearch" />
+					<include name="filterByBudget" />
+					<include name="filterByRating" />
+					<include name="" />
+					<include name="" />
+					<include name="" />
 				</methods>
 			</class>
 		</classes>
