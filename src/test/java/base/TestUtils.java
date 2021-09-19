@@ -81,7 +81,9 @@ public class TestUtils extends TestBase{
     }
 
     /**
-     * @description to check if the expected text is present in the page.
+     * @description to check if the expected text is present in the page. For the purpose
+     * of this automation it produces flaky test as the expected texts are constantly changing.
+     * This method works best when expected texts are constant.
      */
     public static void assertSearchText(String type, String element, String value) {
 
@@ -98,7 +100,7 @@ public class TestUtils extends TestBase{
         try {
             Assert.assertEquals(text, value);
             testInfo.get().log(Status.INFO, value + " found");
-        } catch (RuntimeException e) {
+        } catch (Error e) {
             verificationErrors.append(e);
             String verificationErrorString = verificationErrors.toString();
             testInfo.get().error(value + " not found");

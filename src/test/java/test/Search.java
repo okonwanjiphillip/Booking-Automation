@@ -172,8 +172,8 @@ public class Search extends TestBase {
 
     @Test
     @Parameters({"server"})
-    public static void filterByBudget() {
-
+    public static void filterByBudget() throws InterruptedException {
+//        Thread.sleep(1000000);
         TestUtils.header("Filter by Budget: € 50 – € 100");
         // € 50 – € 100
         filterSearch("//div[@id='filter_price']/div[3]/a/label/div/span", "Limerick: 13 properties found");
@@ -194,8 +194,6 @@ public class Search extends TestBase {
     @Test
     @Parameters({"server"})
     public static void filterByRating() {
-        WebDriverWait wait = new WebDriverWait(getDriver(), TIME);
-
         TestUtils.header("Filter by Star Rating: 3 stars");
         // 3 stars
         filterSearch("//div[@id='filter_class']/div[2]/a/label/div/span", "Limerick: 10 properties found");
@@ -206,12 +204,65 @@ public class Search extends TestBase {
 
         TestUtils.header("Filter by Star Rating: 5 stars");
         // 5 stars
-        filterSearch("//div[@id='filter_class']/div[2]/a[3]/label/div/span", "Limerick: 1 properties found");
+        filterSearch("//div[@id='filter_class']/div[2]/a[3]/label/div/span", "Limerick: 1 property found");
 
         TestUtils.header("Filter by Star Rating: Unrated");
         // Unrated
-        filterSearch("//div[@id='filter_class']/div[2]/a[4]/label/div/span", "Limerick: 1 properties found");
+        filterSearch("//div[@id='filter_class']/div[2]/a[4]/label/div/span", "Limerick: 1 property found");
+    }
 
+    @Test
+    @Parameters({"server"})
+    public static void filterByHealth() {
+        TestUtils.header("Filter by Health");
+        // Properties with additional health & safety measures
+        filterSearch("//div[@id='filter_health_and_hygiene']/div[2]/a/label/div/span", "Limerick: 19 properties found");
+    }
+
+    @Test
+    @Parameters({"server"})
+    public static void filterByDistance() {
+        TestUtils.header("Filter by Distance: Less than 1 km");
+        // Less than 1 km
+        filterSearch("//div[@id='filter_distance']/div[2]/a/label/div/span", "Limerick: 10 properties found");
+
+        TestUtils.header("Filter by Distance: Less than 3 km");
+        // Less than 3 km
+        filterSearch("//div[@id='filter_distance']/div[2]/a[2]/label/div/span", "Limerick: 13 properties found");
+
+        TestUtils.header("Filter by Distance: Less than 5 km");
+        // Less than 5 km
+        filterSearch("//div[@id='filter_distance']/div[2]/a[3]/label/div/span", "Limerick: 19 properties found");
+    }
+
+    @Test
+    @Parameters({"server"})
+    public static void filterByFunThingsToDo() {
+        TestUtils.header("Filter by Fun Things To Do: Golf Course");
+        // Golf course (within 2 miles)
+        filterSearch("//div[@id='filter_popular_activities']/div[2]/a/label/div/span", "Limerick: 12 properties found");
+
+        TestUtils.header("Filter by Fun Things To Do: Fitness Center");
+        // Fitness Center
+        filterSearch("//div[@id='filter_popular_activities']/div[2]/a[2]/label/div/span", "Limerick: 10 properties found");
+
+        TestUtils.header("Filter by Fun Things To Do: Fitness");
+        // Fitness
+        filterSearch("//*/text()[normalize-space(.)='Fitness']/parent::*", "Limerick: 8 properties found");
+
+        TestUtils.header("Filter by Fun Things To Do: Massage");
+        // Massage
+        filterSearch("//*/text()[normalize-space(.)='Massage']/parent::*", "Limerick: 7 properties found");
+
+        TestUtils.header("Filter by Fun Things To Do: Indoor pool");
+        // Indoor pool
+        filterSearch("//*/text()[normalize-space(.)='Indoor pool']/parent::*", "Limerick: 7 properties found");
+
+        // Click on Indoor pool then on sauna, then uncheck indoor pool
+
+        TestUtils.header("Filter by Fun Things To Do: Sauna");
+        // Sauna
+        filterSearch("//*/text()[normalize-space(.)='Sauna']/parent::*", "Limerick: 4 properties found");
     }
 
     public static void filterSearch(String path, String text) {
@@ -225,9 +276,9 @@ public class Search extends TestBase {
         wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.bui-spinner.bui-spinner--size-large > div.bui-spinner__inner")));
         TestUtils.assertSearchText(XPATH, TEXT, text);
 
-        TestUtils.subHeader("Print List of first 5 Properties");
-        for (int i = 1; i <= 5; i++) {
-            String records = getDriver().findElement(By.xpath("//div[@id='hotellist_inner']/div[" +  i + "]/div[2]/div/div/div/h3/a/span")).getText();
+        TestUtils.subHeader("Print List of first property");
+        for (int i = 1; i <= 1; i++) {
+            String records = getDriver().findElement(By.xpath("//div[@id='hotellist_inner']/div/div[2]/div/div/div/h3/a/span")).getText();
             if (records != null) {
                 testInfo.get().info(records);
             }

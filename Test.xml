@@ -18,8 +18,9 @@
 					<include name="setDateForSearch" />
 					<include name="filterByBudget" />
 					<include name="filterByRating" />
-					<include name="" />
-					<include name="" />
+					<include name="filterByHealth" />
+					<include name="filterByDistance" />
+					<include name="filterByFunThingsToDo" />
 					<include name="" />
 				</methods>
 			</class>
