@@ -21,28 +21,24 @@ import java.util.Date;
 
 public class TestUtils extends TestBase{
 
-    public static String getScreenshot() throws IOException {
+    public static String getScreenshot() {
         TakesScreenshot ts = (TakesScreenshot) getDriver();
         File scrFile = ts.getScreenshotAs(OutputType.FILE);
 
         String encodedBase64 = null;
-        FileInputStream fileInputStreamReader = null;
-        try {
-            fileInputStreamReader = new FileInputStream(scrFile);
+        try (FileInputStream fileInputStreamReader = new FileInputStream(scrFile)) {
             byte[] bytes = new byte[(int) scrFile.length()];
             fileInputStreamReader.read(bytes);
             encodedBase64 = new String(Base64.encodeBase64(bytes));
 
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            fileInputStreamReader.close();
         }
 
          return "data:image/png;base64," + encodedBase64;
     }
 
-    public static void addScreenShot() throws IOException {
+    public static void addScreenShot() {
         String screenshotPath = TestUtils.getScreenshot();
         testInfo.get().addScreenCaptureFromBase64String(screenshotPath);
     }
@@ -73,7 +69,7 @@ public class TestUtils extends TestBase{
      */
     public static void clickElement(String type, String element) {
         JavascriptExecutor ex = (JavascriptExecutor) getDriver();
-        WebElement clickThis = null;
+        WebElement clickThis;
         TargetTypeEnum targetTypeEnum = TargetTypeEnum.valueOf(type);
         clickThis = switch (targetTypeEnum) {
             case ID -> getDriver().findElement(By.id(element));
@@ -107,7 +103,7 @@ public class TestUtils extends TestBase{
             Assert.assertEquals(text, value);
             testInfo.get().log(Status.INFO, value + " found");
         } catch (Error e) {
-            verificationErrors.append(e.toString());
+            verificationErrors.append(e);
             String verificationErrorString = verificationErrors.toString();
             testInfo.get().error(value + " not found");
             testInfo.get().error(verificationErrorString);
@@ -115,8 +111,8 @@ public class TestUtils extends TestBase{
     }
 
     /**
-     * @return New Date with
-     * @description to generate randomIP address.
+     * @return  Retuns a string "newD"
+     * @description Method returns a given future date, this method focuses on monthly increases.
      */
     public static String getFutureDate(int futureTimePeriod) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
