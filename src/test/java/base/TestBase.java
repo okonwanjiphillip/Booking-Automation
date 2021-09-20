@@ -108,7 +108,7 @@ public class TestBase {
         reports.flush();
     }
 
-    @AfterSuite
+    @AfterSuite(description = "Removes thread value, basically aids with memory management.")
     public void unload() {
         driver.remove();
         parentTest.remove();

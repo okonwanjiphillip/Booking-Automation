@@ -22,6 +22,9 @@ import java.util.Date;
 
 public class TestUtils extends TestBase{
 
+    /**
+     * @description This method is used to get a screenshot and convert it to base 64
+     */
     public static String getScreenshot() {
         TakesScreenshot ts = (TakesScreenshot) getDriver();
         File scrFile = ts.getScreenshotAs(OutputType.FILE);
@@ -39,11 +42,17 @@ public class TestUtils extends TestBase{
          return "data:image/png;base64," + encodedBase64;
     }
 
+    /**
+     * @description This method is used to add screenshot to the Report
+     */
     public static void addScreenShot() {
         String screenshotPath = TestUtils.getScreenshot();
         testInfo.get().addScreenCaptureFromBase64String(screenshotPath);
     }
 
+    /**
+     * @description This method is used to get browser name and version for the Report purposes
+     */
     public static String checkBrowser() {
         // Get Browser name and version.
         Capabilities caps = ((RemoteWebDriver) getDriver()).getCapabilities();
@@ -55,7 +64,7 @@ public class TestUtils extends TestBase{
     }
 
     /**
-     * This method is used to clear input fields and send keys
+     * @description This method is used to clear input fields and send keys
      */
     public static void sendKeys(By locator, String text) {
         getDriver().findElement(locator).click();
@@ -64,7 +73,7 @@ public class TestUtils extends TestBase{
     }
 
     /**
-     * This method clicks on elements and also elements that are overlapped by other elements
+     * @description This method clicks on elements and also elements that are overlapped by other elements
      */
     public static void clickElement(String type, String element) {
         JavascriptExecutor ex = (JavascriptExecutor) getDriver();
@@ -126,6 +135,9 @@ public class TestUtils extends TestBase{
         return newD;
     }
 
+    /**
+     * @description This method is used to return a list of items on a string
+     */
     public static void printList(int count, String validLocation, By path) {
         String flag = null;
         for (int i = 1; i <= count; i++) {
@@ -191,6 +203,9 @@ public class TestUtils extends TestBase{
         }
     }*/
 
+    /**
+     * @description This method extracts an integer from a list
+     */
     public static int listOfProperties() {
         String list = getDriver().findElement(By.xpath(Search.TEXT)).getText();
         String[] word = list.split(" ");
@@ -198,6 +213,9 @@ public class TestUtils extends TestBase{
         return Integer.parseInt(word1);
     }
 
+    /**
+     * @description This method closes the cookies modal
+     */
     public static void closeModal() {
         WebDriverWait wait = new WebDriverWait(getDriver(), 30);
 
@@ -209,16 +227,25 @@ public class TestUtils extends TestBase{
         clickElement("ID", "onetrust-accept-btn-handler");
     }
 
+    /**
+     * @description Prints a header markup to the report
+     */
     public static void header(String text) {
         Markup a = MarkupHelper.createLabel(text, ExtentColor.BLUE);
         testInfo.get().info(a);
     }
 
+    /**
+     * @description Prints a subheader markup to the report
+     */
     public static void subHeader(String text) {
         Markup a = MarkupHelper.createLabel(text, ExtentColor.GREEN);
         testInfo.get().info(a);
     }
 
+    /**
+     * @description Prints a validation header markup to the report
+     */
     public static void validationHeader(String text) {
         Markup a = MarkupHelper.createLabel(text, ExtentColor.BROWN);
         testInfo.get().info(a);
