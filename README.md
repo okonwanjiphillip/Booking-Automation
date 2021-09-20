@@ -54,9 +54,9 @@ Extent report is going to be automatically generated and available in
 
 ### Overview of Project
 
-In the src/test/java/base we have the Testbase( This houses the setup of the project, the methods which starts the chromedriver ), TestUtils(We have methods which are useful and would be used through the project), OptionsManager(This houses the browser options for both Chrome and Firefox).
+In the src/test/java/base we have the Testbase( This houses the setup of the project, the methods which starts the chromedriver ), TestUtils(We have methods which are useful and would be used through the project), OptionsManager(This houses the browser options for both Chrome and Firefox). 
+In the src/test/java/test we have the Search.java class which houses the Search test case and all other test cases to come.
 
-In the src/test/java/text we have the Search.java class which houses the test cases for the project.
 ---------------
 
 ## Contact
