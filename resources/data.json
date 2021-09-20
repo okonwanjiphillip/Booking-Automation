@@ -1,0 +1,11 @@
+{
+  "url": {
+    "url": "https://www.booking.com"
+  },
+
+  "searchChar": {
+    "specialChar": "@",
+    "blankLocation": "    ",
+    "validLocation": "Limerick"
+  }
+}

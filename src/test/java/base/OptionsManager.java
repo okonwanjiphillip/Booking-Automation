@@ -8,7 +8,7 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 public class OptionsManager extends TestBase {
 
     //Get Chrome Options
-    public ChromeOptions getChromeOptions() {
+    public static ChromeOptions getChromeOptions() {
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--start-maximized");
@@ -17,12 +17,11 @@ public class OptionsManager extends TestBase {
         options.addArguments("--disable-popup-blocking");
         options.addArguments("--disable-notifications");
         options.addArguments("--disable-dev-shm-usage");
-        // options.addArguments("--incognito");
         return options;
     }
 
     // Get Firefox Options
-    public FirefoxOptions getFirefoxOptions() {
+    public static FirefoxOptions getFirefoxOptions() {
         FirefoxOptions options = new FirefoxOptions();
         FirefoxProfile profile = new FirefoxProfile();
 

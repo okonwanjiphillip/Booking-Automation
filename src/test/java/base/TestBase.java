@@ -13,21 +13,18 @@ import org.testng.ITestResult;
 import org.testng.annotations.*;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
 public class TestBase {
-    public static String testMethod;
-    public static ExtentReports reports;
-    public static ExtentHtmlReporter htmlReporter;
-    public static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
-    private static ThreadLocal<ExtentTest> parentTest = new ThreadLocal<>();
-    public static ThreadLocal<ExtentTest> testInfo = new ThreadLocal<>();
-    private static OptionsManager optionsManager = new OptionsManager();
-
-    public static String htmlUrl;
+    private ExtentReports reports;
+    private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
+    private static final ThreadLocal<ExtentTest> parentTest = new ThreadLocal<>();
+    public static final ThreadLocal<ExtentTest> testInfo = new ThreadLocal<>();
+    private static final String USER = "user.dir";
+    public static final String XPATH = "XPATH";
+    public static final int TIME = 15;
 
     public static WebDriver getDriver() {
         return driver.get();
@@ -48,46 +45,39 @@ public class TestBase {
 
     @BeforeSuite
     @Parameters({ "groupReport", "device" })
-    public void setUp(String groupReport, String device) throws Exception {
-        htmlReporter = new ExtentHtmlReporter(new File(System.getProperty("user.dir") + groupReport));
+    public void setUp(String groupReport, String device) throws IOException, ParseException {
+        ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(new File(System.getProperty(USER) + groupReport));
         reports = new ExtentReports();
         reports.setSystemInfo("Test Environment", myUrl());
         if (device.equalsIgnoreCase("desktop")) {
             reports.setSystemInfo("Test Device", "Laptop");
         }
-
         reports.attachReporter(htmlReporter);
     }
 
-    @Parameters({ "myBrowser", "environment", "server" })
+    @Parameters({ "myBrowser", "server" })
     @BeforeClass
-    public void beforeClass(String myBrowser, String environment, String server) throws Exception {
+    public void beforeClass(String myBrowser, String server) throws IOException, ParseException {
         ExtentTest parent = reports.createTest(getClass().getName());
         parentTest.set(parent);
 
-//        if (server.equals("local")) {
             // Local Directory
             if (myBrowser.equalsIgnoreCase("firefox")) {
-                File classpathRoot = new File(System.getProperty("user.dir"));
+                File classpathRoot = new File(System.getProperty(USER));
                 File firefoxDriver = new File(classpathRoot, "geckodriver.exe");
                 System.setProperty("webdriver.gecko.driver", firefoxDriver.getAbsolutePath());
-                driver.set(new FirefoxDriver(optionsManager.getFirefoxOptions()));
+                driver.set(new FirefoxDriver(OptionsManager.getFirefoxOptions()));
                 getDriver().manage().window().maximize();
-//				getDriver().manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
                 getDriver().get(myUrl());
 
             } else if (myBrowser.equalsIgnoreCase("chrome")) {
-                File classpathRoot = new File(System.getProperty("user.dir"));
+                File classpathRoot = new File(System.getProperty(USER));
                 File chromeDriver = new File(classpathRoot, "chromedriver.exe");
                 System.setProperty("webdriver.chrome.driver", chromeDriver.getAbsolutePath());
-                driver.set(new ChromeDriver(optionsManager.getChromeOptions()));
+                driver.set(new ChromeDriver(OptionsManager.getChromeOptions()));
                 getDriver().manage().window().maximize();
-//				getDriver().manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
                 getDriver().get(myUrl());
-
             }
-//        }
-
         getDriver().get(myUrl());
     }
 
@@ -97,23 +87,30 @@ public class TestBase {
         ExtentTest child = parentTest.get().createNode(method.getName());
         testInfo.set(child);
         testInfo.get().assignCategory("Regression");
-        testInfo.get().getModel().setDescription(TestUtils.CheckBrowser());
-        testMethod = getClass().getName() + "-" + method.getName();
+        testInfo.get().getModel().setDescription(TestUtils.checkBrowser());
     }
 
     @AfterMethod(description = "to display the result after each test method")
     public void captureStatus(ITestResult result) {
 
         if (result.getStatus() == ITestResult.FAILURE) {
-            String screenshotPath = TestUtils.getScreenshot();
-            testInfo.get().addScreenCaptureFromBase64String(screenshotPath);
+            TestUtils.addScreenShot();
             testInfo.get().fail(result.getThrowable());
             getDriver().navigate().refresh();
-        } else if (result.getStatus() == ITestResult.SUCCESS)
+        } else if (result.getStatus() == ITestResult.SUCCESS) {
+            TestUtils.addScreenShot();
             testInfo.get().pass(result.getName() + " Test passed");
-        else
+        }
+        else {
+            TestUtils.addScreenShot();
             testInfo.get().skip(result.getThrowable());
-
+        }
         reports.flush();
+    }
+
+    @AfterSuite
+    public void unload() {
+        driver.remove();
+        parentTest.remove();
     }
 }
