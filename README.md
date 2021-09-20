@@ -36,6 +36,8 @@ This is a selenium test suite used in automating the Search Functionality of Boo
 * Go to your TestNG configurations which should come inbuilt with IntelliJ and add this to your VM options: 
 
 		-ea -Dtestng.dtd.http=true
+		
+![Capture](https://user-images.githubusercontent.com/23248883/133949225-3c5fb630-93c7-4048-b035-f89b43a2c08a.PNG)
 
 ### Dependent libraries
 
